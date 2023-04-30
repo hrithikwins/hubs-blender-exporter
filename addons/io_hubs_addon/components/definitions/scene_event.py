@@ -6,10 +6,10 @@ from bpy.props import BoolProperty, StringProperty
 from .networked import migrate_networked
 
 
-class EventEmitter(HubsComponent):
+class SceneEvent(HubsComponent):
     _definition = {
-        'name': 'event-emitter',
-        'display_name': 'Event Emitter',
+        'name': 'scene-event',
+        'display_name': 'Scene Event',
         'category': Category.OBJECT,
         'node_type': NodeType.NODE,
         'panel_type': [PanelType.OBJECT, PanelType.BONE],
@@ -20,11 +20,13 @@ class EventEmitter(HubsComponent):
 # additional props : {url: "https://youtube.com/",type:"full",action: "close"}
     eventName: StringProperty(
         name="Event Name",
-        description="Event name in lower snake cake (example: event_name)",
+        description="Event name in lower snake cake (example: iframe_open)",
         default="iframe_open")
 
     additionalProps: StringProperty(
         name="Additional Props",
         description="Use {} always to specify and should be valid JSON object (example: {url: \"https://youtube.com\"})",
-        default="{url: \"https://youtube.com\"}")
+        default="{url: 'https://youtube.com/embed/someid'}")
+
+
 
