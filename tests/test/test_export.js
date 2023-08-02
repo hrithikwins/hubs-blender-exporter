@@ -95,7 +95,12 @@ describe('Exporter', function () {
         assert.strictEqual(utils.checkExtensionAdded(node, 'MOZ_hubs_components'), true);
 
         const ext = node.extensions['MOZ_hubs_components'];
-        assert.deepStrictEqual(ext, { 'nav-mesh': {} });
+        assert.deepStrictEqual(ext, { 
+          'nav-mesh': {}, 
+          'visible': {
+            'visible': false
+          }
+        });
       });
 
       it('can export video-texture-source and video-texture-target', function () {
@@ -635,7 +640,8 @@ describe('Exporter', function () {
         const ext = node.extensions['MOZ_hubs_components'];
         assert.deepStrictEqual(ext["audio-zone"], {
           "inOut": true,
-          "outIn": true
+          "outIn": true,
+          "dynamic": false
         });
         assert.deepStrictEqual(ext["audio-params"], {
           "audioType": "pannernode",
@@ -945,6 +951,21 @@ describe('Exporter', function () {
             "ripplesScale": 1
           }
         });
+      });
+
+      it('can export pdf', function () {
+        let gltfPath = path.resolve(outDirPath, 'pdf.gltf');
+        const asset = JSON.parse(fs.readFileSync(gltfPath));
+
+        assert.strictEqual(asset.extensionsUsed.includes('MOZ_hubs_components'), true);
+        assert.strictEqual(utils.checkExtensionAdded(asset, 'MOZ_hubs_components'), true);
+
+        const node = asset.nodes[0];
+        assert.strictEqual(utils.checkExtensionAdded(node, 'MOZ_hubs_components'), true);
+
+        const ext = node.extensions['MOZ_hubs_components'];
+        assert.deepStrictEqual(ext['image'], { "controls": true, src: 'https://hubs.mozilla.com' });
+        assert.strictEqual(utils.UUID_REGEX.test(ext['networked']['id']), true);
       });
     });
   });

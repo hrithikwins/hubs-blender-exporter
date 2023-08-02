@@ -1,6 +1,6 @@
 import tempfile
 import bpy
-from .components_registry import get_component_by_name
+from .components_registry import get_component_by_name, get_components_registry
 from .gizmos import update_gizmos
 from .types import PanelType
 from mathutils import Vector
@@ -23,7 +23,6 @@ def add_component(obj, component_name):
         if 'create_gizmo' in component_class.__dict__:
             update_gizmos()
         component_class.init_instance_version(obj)
-        component_class.init(obj)
         for dep_name in component_class.get_deps():
             dep_class = get_component_by_name(dep_name)
             if dep_class:
@@ -33,6 +32,7 @@ def add_component(obj, component_name):
             else:
                 print("Dependency '%s' from module '%s' not registered" %
                       (dep_name, component_name))
+        component_class.init(obj)
 
 
 def remove_component(obj, component_name):
@@ -54,6 +54,10 @@ def remove_component(obj, component_name):
             else:
                 print("Dependecy '%s' from module '%s' not registered" %
                       (dep_name, component_name))
+
+
+def get_objects_with_component(component_name):
+    return [ob for ob in bpy.context.view_layer.objects if has_component(ob, component_name)]
 
 
 def has_component(obj, component_name):
@@ -94,10 +98,6 @@ def get_object_source(context, panel_type):
         return context.object
 
 
-def dash_to_title(s):
-    return s.replace("-", " ").title()
-
-
 def children_recurse(ob, result):
     for child in ob.children:
         result.append(child)
@@ -128,10 +128,19 @@ def redraw_component_ui(context):
 def is_linked(datablock):
     if not datablock:
         return False
-    return bool(datablock.library or datablock.override_library)
+    return bool(datablock.id_data.library or datablock.id_data.override_library)
 
+
+def update_image_editors(old_img, img):
+    for window in bpy.context.window_manager.windows:
+        for area in window.screen.areas:
+            if area.type == 'IMAGE_EDITOR':
+                if area.spaces.active.image == old_img:
+                    area.spaces.active.image = img
 
 # Note: Set up stuff specifically for C FILE pointers so that they aren't truncated to 32 bits on 64 bit systems.
+
+
 class _FILE(ctypes.Structure):
     """opaque C FILE type"""
 
